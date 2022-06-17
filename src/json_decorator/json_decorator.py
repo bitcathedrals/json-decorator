@@ -11,7 +11,10 @@ def _formatter(output):
         return "\"%s\"" % output
 
     if isinstance(ouptut, dict):
-        return "{" + ",".join(["\"%s: %s\"" % (key, _formatter(value)) for key,value in output.items()]) + "}" 
+        return 
+            "{\n" + 
+            ",\n".join(["\"%s\": %s" % (key, _formatter(value)) for key,value in output.items()])
+             + "\n}" 
 
     if isinstance(output, list):
         return "[" + ",".join([_formatter(element) for element in output]) + "]"
