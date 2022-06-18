@@ -8,15 +8,23 @@ def _formatter(output):
         return ""
 
     if isinstance(output, str):
+        if output[0] == "\"":
+            return output
+
         return "\"%s\"" % output
 
-    if isinstance(ouptut, dict):
-        return 
-            "{\n" + 
-            ",\n".join(["\"%s\": %s" % (key, _formatter(value)) for key,value in output.items()])
-             + "\n}" 
+    if isinstance(output, dict):
+        if not output:
+            return "{}"
+
+        return "{\n"\
+            + ",\n".join(["\"%s\": %s" % (key, _formatter(value)) for key,value in output.items()])\
+            + "\n}" 
 
     if isinstance(output, list):
+        if not output:
+            return "[]"
+
         return "[" + ",".join([_formatter(element) for element in output]) + "]"
 
     if isinstance(output, datetime):
