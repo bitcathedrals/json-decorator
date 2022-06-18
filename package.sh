@@ -59,7 +59,9 @@ case $1 in
         shift
         PYTHONPATH="$PYTHONPATH:src" pyenv exec $@ 
     ;;
-
+    "repl")
+        PYTHONPATH="$PYTHONPATH:src" pyenv exec ptpython
+    ;;
 #
 #   build
 #
@@ -84,7 +86,7 @@ case $1 in
         pyenv rehash
     ;;
     "dev-all")
-        pythion -m pip install -U pip
+        python -m pip install -U pip
         python -m pip install -U pipenv
         pipenv install --dev --skip-lock
         pyenv rehash
