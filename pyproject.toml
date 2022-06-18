@@ -1,4 +1,4 @@
 [project]
-name = "json-decorator"
+name = "json_decorator"
 version = "0.0.1"
-build-backend = "setuptools.build_meta"
+
