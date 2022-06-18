@@ -2,6 +2,9 @@
 
 PACKAGE_PYTHON_VERSION="3.10:latest"
 
+PUBLISH_SERVER=localhost
+PUBLISH_USER=packages
+
 case $1 in
 
 #
@@ -65,43 +68,49 @@ case $1 in
 #
 #   build
 #
-    "freeze")
-        pipenv lock
-    ;;
-    "requirements")
-        pipenv run python -m pip freeze
-    ;;
     "build")
-        pyenv local "release"
-        pipenv install --ignore-pipfile &&\
-        pyenv exec python -m pytest tests &&\
         pyenv exec python -m build
     ;;
 
 #
 # dev environment
 #
-    "dev-pull")
+    "pull")
         pipenv install --skip-lock
         pyenv rehash
     ;;
-    "dev-all")
+    "all")
         python -m pip install -U pip
         python -m pip install -U pipenv
         pipenv install --dev --skip-lock
         pyenv rehash
     ;;
-  
+    "push")
+        scp -o "StrictHostKeyChecking=no" dist/*-0.0.* "${PUBLISH_USER}@${PUBLISH_SERVER}:~/packages/dev/"
+    ;;
 #
 # release environment
 #
-    "release-pull")
+    "freeze")
+        pipenv lock
+    ;;
+    "requirements")
+        pipenv run python -m pip freeze
+    ;;
+    "release")
         pyenv exec python -m pip -U pip
         python -m pip install -U pipenv
         pipenv install --ignore-pipfile
         pyenv rehash
     ;;
 
+#
+# publish
+#
+
+    "publish")
+        scp -o "StrictHostKeyChecking=no" dist/*-[0-9]*.[1-9]*.* "${PUBLISH_USER}@${PUBLISH_SERVER}:~/packages/release/"
+    ;;
     *)
         echo "unknown command."
     ;;
