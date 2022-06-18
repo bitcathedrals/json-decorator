@@ -52,12 +52,12 @@ case $1 in
         pipenv graph
     ;;
     "test")
-        pyenv exec python -m pytest tests
+        PYTHONPATH="$PYTHONPATH:src" pyenv exec python -m pytest tests
     ;;
 
     "run")
         shift
-        pyenv exec $@ 
+        PYTHONPATH="$PYTHONPATH:src" pyenv exec $@ 
     ;;
 
 #
