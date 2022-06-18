@@ -3,34 +3,54 @@
 from datetime import datetime
 from functools import wraps
 
+class Stringified:
+    def __init__(self, data, quote=True):
+        if not data:
+            self.string = ""
+            return
+
+        if isinstance(data, Stringified):
+            self.string = data.value
+            return
+
+        if isinstance(data, str):
+            if quote:
+                self.string = "\"%s\"" % data
+            else:
+                self.string = data
+            return
+
+        if isinstance(data, datetime):
+            self.string = "\"%s\"" % output.isoformat()
+            return
+
+        self.string = str(data)
+
+    @property
+    def json(self):
+        return self.string
+
 def _formatter(output):
     if output is None:
-        return ""
-
-    if isinstance(output, str):
-        if output[0] == "\"":
-            return output
-
-        return "\"%s\"" % output
+        return Stringified("", quote=False)
 
     if isinstance(output, dict):
         if not output:
-            return "{}"
+            return Stringified("{}", quote=False)
 
-        return "{\n"\
-            + ",\n".join(["\"%s\": %s" % (key, _formatter(value)) for key,value in output.items()])\
-            + "\n}" 
+        return Stringified(\
+            "{\n"\
+            + ",\n".join(["\"%s\": %s" % (key, _formatter(value).json) for key,value in output.items()])\
+            + "\n}",
+            quote=False) 
 
     if isinstance(output, list):
         if not output:
-            return "[]"
+            return Stringified("[]", quote=False)
 
-        return "[" + ",".join([_formatter(element) for element in output]) + "]"
+        return Stringified("[" + ",".join([_formatter(element).json for element in output]) + "]", quote=False)
 
-    if isinstance(output, datetime):
-        return "\"%s\"" % output.isoformat()
-
-    return str(output)
+    return Stringified(output)
 
 
 def json_fn(static=None, pre=None, post=None):
@@ -42,15 +62,15 @@ def json_fn(static=None, pre=None, post=None):
             output = wrapped(*args, **kwargs)
 
             if static:
-                return _formatter(static.update(output))
+                return _formatter(static.update(output)).json
 
             if pre:
-                return _formatter(pre + output)
+                return _formatter(pre + output).json
         
             if post:
-                return _formatter(output + post)
+                return _formatter(output + post).json
 
-            return _formatter(output)
+            return _formatter(output).json
     
         return decorator
 
