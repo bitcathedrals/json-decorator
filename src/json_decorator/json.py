@@ -33,11 +33,7 @@ def _formatter(output):
     return str(output)
 
 
-class StaticTypeException(Exception):
-    def __init__(*args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-def json_fn(wrapped, static=None):
+def json_fn(static=None, pre=None, post=None):
 
     def generator(wrapped):
 
@@ -46,16 +42,16 @@ def json_fn(wrapped, static=None):
             output = wrapped(*args, **kwargs)
 
             if static:
-                if isinstance(static, dict):
-                    return _formatter(static.update(output))
+                return _formatter(static.update(output))
 
-                if isinstance(static, list):
-                    return _formatter(output + static)
-
-                raise StaticTypeException(static)
+            if pre:
+                return _formatter(pre + output)
         
+            if post:
+                return _formatter(output + post)
+
             return _formatter(output)
-         
-        return decorator
     
+        return decorator
+
     return generator
