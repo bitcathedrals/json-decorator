@@ -5,6 +5,8 @@ PACKAGE_PYTHON_VERSION="3.10:latest"
 PUBLISH_SERVER=localhost
 PUBLISH_USER=packages
 
+VIRTUAL_PREFIX="json"
+
 case $1 in
 
 #
@@ -30,16 +32,16 @@ case $1 in
     "virtual-install")
         pyenv install --skip-existing "$PACKAGE_PYTHON_VERSION"
 
-        LATEST=$(pyenv versions | grep -E '\d+\.\d+\.\d+' | sed 's/ *//g')
+        LATEST=$(pyenv versions | grep -E '^ *\d+\.\d+\.\d+$' | sed 's/ *//g')
 
-        pyenv virtualenv "$LATEST" "release"
+        echo "installing $LATEST to $VIRTUAL_PREFIX"
 
-        pyenv virtualenv "$LATEST" "dev"
+        pyenv virtualenv "$LATEST" "${VIRTUAL_PREFIX}_release"
+        pyenv virtualenv "$LATEST" "${VIRTUAL_PREFIX}_dev"
     ;;
     "virtual-destroy")
-        pyenv virtualenv-delete "release"
-        pyenv virtualenv-delete "dev"
-
+        pyenv virtualenv-delete "${VIRTUAL_PREFIX}_release"
+        pyenv virtualenv-delete "${VIRTUAL_PREFIX}_dev"
     ;;
 
     "virtual-list")
@@ -57,7 +59,10 @@ case $1 in
     "test")
         PYTHONPATH="$PYTHONPATH:src" pyenv exec python -m pytest tests
     ;;
-
+    "python")
+        shift
+        PYTHONPATH="$PYTHONPATH:src" pyenv exec python $@
+    ;;
     "run")
         shift
         PYTHONPATH="$PYTHONPATH:src" pyenv exec $@ 
@@ -87,6 +92,9 @@ case $1 in
     ;;
     "push")
         scp -o "StrictHostKeyChecking=no" dist/*-0.0.* "${PUBLISH_USER}@${PUBLISH_SERVER}:~/packages/dev/"
+    ;;
+    "list")
+        pipenv graph
     ;;
 #
 # release environment
