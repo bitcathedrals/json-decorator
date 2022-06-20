@@ -4,53 +4,48 @@ from datetime import datetime
 from functools import wraps
 
 class Stringified:
-    def __init__(self, data, quote=True):
+    def __init__(self, data, quote=False):
         if not data:
-            self.string = ""
+            self.json = ""
             return
 
         if isinstance(data, Stringified):
-            self.string = data.value
+            self.json = data.json
             return
 
         if isinstance(data, str):
             if quote:
-                self.string = "\"%s\"" % data
-            else:
-                self.string = data
+                self.json = "\"%s\"" % data
+                return
+
+            self.json = data
             return
 
         if isinstance(data, datetime):
-            self.string = "\"%s\"" % output.isoformat()
+            self.json = "\"%s\"" % data.isoformat()
             return
 
-        self.string = str(data)
-
-    @property
-    def json(self):
-        return self.string
+        self.json = str(data)
 
 def _formatter(output):
     if output is None:
-        return Stringified("", quote=False)
+        return Stringified("")
 
     if isinstance(output, dict):
         if not output:
-            return Stringified("{}", quote=False)
+            return Stringified("{}")
 
-        return Stringified(\
-            "{\n"\
-            + ",\n".join(["\"%s\": %s" % (key, _formatter(value).json) for key,value in output.items()])\
-            + "\n}",
-            quote=False) 
+        return Stringified("{\n"\
+                           + ",\n".join(["\"%s\": %s" % (key, _formatter(value).json) for key,value in output.items()])\
+                           + "\n}") 
 
     if isinstance(output, list):
         if not output:
-            return Stringified("[]", quote=False)
+            return Stringified("[]")
 
-        return Stringified("[" + ",".join([_formatter(element).json for element in output]) + "]", quote=False)
+        return Stringified("[" + ",".join([_formatter(element).json for element in output]) + "]")
 
-    return Stringified(output)
+    return Stringified(output, quote=True)
 
 
 def json_fn(static=None, pre=None, post=None):
