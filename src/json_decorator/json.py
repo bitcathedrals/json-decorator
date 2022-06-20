@@ -18,7 +18,7 @@ class Stringified:
                 self.json = "\"%s\"" % data
                 return
 
-            self.json = data
+            self.json = data 
             return
 
         if isinstance(data, datetime):
@@ -37,7 +37,7 @@ def _formatter(output):
 
         return Stringified("{\n"\
                            + ",\n".join(["\"%s\": %s" % (key, _formatter(value).json) for key,value in output.items()])\
-                           + "\n}") 
+                           + "\n}")
 
     if isinstance(output, list):
         if not output:
@@ -45,7 +45,10 @@ def _formatter(output):
 
         return Stringified("[" + ",".join([_formatter(element).json for element in output]) + "]")
 
-    return Stringified(output, quote=True)
+    if isinstance(output, str):
+        return Stringified(output, quote=True)
+
+    return Stringified(output)
 
 
 def json_fn(static=None, pre=None, post=None):
