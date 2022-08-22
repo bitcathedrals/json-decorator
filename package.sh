@@ -111,14 +111,6 @@ case $1 in
         pipenv install --ignore-pipfile
         pyenv rehash
     ;;
-
-#
-# publish
-#
-
-    "publish")
-        scp -o "StrictHostKeyChecking=no" dist/*-[0-9]*.[1-9]*.* "${PUBLISH_USER}@${PUBLISH_SERVER}:~/packages/release/"
-    ;;
     *)
         echo "unknown command."
     ;;
