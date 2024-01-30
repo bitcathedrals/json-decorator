@@ -1,4 +1,22 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
+
 name = "json_decorator"
-version = "0.0.5"
+version = "0.3.0"
+
+license = { file = "LICENSE" }
+
+readme = "README.md"
+
+description = "a decorator that generates json from the returned values of the function"
+authors = [ { name = "Michael Mattie" , email = "codermattie@runbox.com" } ]
+
+[project.urls]
+homepage = "https://github.com/bitcathedrals/json_decorator"
+repository = "https://github.com/bitcathedrals/json_decorator.git"
+
+
 
