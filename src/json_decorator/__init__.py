@@ -73,12 +73,15 @@ def json_fn(static=None, pre=None, post=None):
 
     return generator
 
-def json_method(static=None, pre=None, post=None, add=None):
+def json_method(static=None, pre=None, post=None, registry=None):
 
     def generator(wrapped):
 
-        if add:
-            add.wrap_list(add, wrapped.__name__)
+        if registry is not None:
+            name = wrapped.__name__
+
+            if name not in registry:
+                registry.append(name)
         
         @wraps(wrapped)
         def json_decorator(*args, **kwargs):
@@ -99,21 +102,20 @@ def json_method(static=None, pre=None, post=None, add=None):
 
     return generator
 
-def json_class(cls):
-    class JsonObject(cls):
-        json_wrapped = []
+def json_class(registry):
+    def factory(cls):
+        
+        class JsonObjectClass(cls):
+            def json(self):
+                output = {}
 
-        def wrap_list(cls, name):
-            if name in cls.json_wrapped:
-                pass
-            else:
-                cls.json_wrapped.append(name)
+                if registry:
+                    for name in registry:
+                        method = getattr(self, name)
+                        output[name] = method()
+            
+                return output
+            
+        return JsonObjectClass
 
-        def json_object(self):
-            output = {}
-
-            for name in self.__class__:
-                method = getattr(self, name)
-                output['name'] = method()
-
-    return JsonObject
+    return factory

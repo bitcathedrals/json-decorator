@@ -1,20 +1,23 @@
 import pytest
-from json_decorator import json_fn
+from json_decorator import json_method, json_class
 
+SampleJsonRegistry = []
+
+@json_class(SampleJsonRegistry)
 class SampleJson:
-    @json_fn()
+    @json_method(registry=SampleJsonRegistry)
     def a_string(self):
         return "test"
 
-    @json_fn()
+    @json_method(registry=SampleJsonRegistry)
     def a_digit(self):
         return 10
 
-    @json_fn()
+    @json_method(registry=SampleJsonRegistry)
     def a_list(self):
         return [1,2,3]
 
-    @json_fn()
+    @json_method(registry=SampleJsonRegistry)
     def a_dict(self):
         return {'one': 1, 'two': 2}
 
@@ -34,4 +37,13 @@ class TestDecorator:
 
     def test_dict(self, json_object):
         assert "{\n\"one\": 1,\n\"two\": 2\n}" == json_object.a_dict()
+
+    def test_object(self, json_object):
+        assert {
+            'a_string': '"test"',
+            'a_digit': '10',
+            'a_list': '[1,2,3]',
+            'a_dict': '{\n"one": 1,\n"two": 2\n}'
+        } == json_object.json()
+                
 

@@ -5,7 +5,7 @@ class TestFormatter:
         assert '"string"' == formatter("string").json
 
     def test_digit(self):
-        assert "10" == formatter(10).json
+        assert '10' == formatter(10).json
 
     def test_dict_empty(self):
         assert "{}" == formatter({}).json
