@@ -1,4 +1,4 @@
-from json_decorator.json import _formatter as formatter
+from json_decorator import _formatter as formatter
 
 class TestFormatter:
     def test_string(self):

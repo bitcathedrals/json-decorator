@@ -1,6 +1,6 @@
 import pytest
 
-from json_decorator.json import json_fn
+from json_decorator import json_fn
 
 
 class SampleJson:
