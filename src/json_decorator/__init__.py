@@ -1,7 +1,9 @@
 # copyright (2024) Michael Mattie (codermattie@runbox.com)
 
 from datetime import datetime
+
 from functools import wraps
+from decorator import decorator
 
 class Stringified:
     def __init__(self, data, quote=False):
@@ -103,8 +105,10 @@ def json_method(static=None, pre=None, post=None, registry=None):
     return generator
 
 def json_class(registry):
+
+    @decorator
     def factory(cls):
-        
+
         class JsonObjectClass(cls):
             def json(self):
                 output = {}
