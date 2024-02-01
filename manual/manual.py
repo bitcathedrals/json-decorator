@@ -1,20 +1,19 @@
-from json_decorator import jsonify_class, jsonify
+from json_decorator import jsonify
 
-@jsonify_class
+@jsonify
 class test_me:
 	@jsonify(json_property=True)
-	def test():
+	def test(self):
 		return 'test'
 	
 	@jsonify
-	def no_arg():
+	def no_arg(self):
 		return 'pass'
 	
-
-@jsonify_class
+@jsonify
 class test_bar:
 	@jsonify(pre='test more')
-	def test():
+	def test(self):
 		return 'test'
 	
 @jsonify

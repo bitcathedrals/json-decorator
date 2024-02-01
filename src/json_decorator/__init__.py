@@ -70,84 +70,13 @@ def _combiner(output):
             
     return Stringified(output).json
 
-class jsonify:
-    def __init__(self, *given, dict=None, pre=None, post=None, json_property=None):
-        self.given = given
-
-        if len(given) > 0 and callable(given[0]):
-            self.fn = given[0]
-        else:
-            self.fn = None
-
-        self.dict = dict
-        self.pre = pre
-        self.post = post
-        self.json_property = json_property
-
-    def json_wrapper(self, wrapper, *args, **kwargs):
-        print(repr(args))
-        print('fn is: ' + repr(wrapper.fn))
-
-        output = wrapper.fn(*args, **kwargs)
-
-        if wrapper.dict:
-            merge = deepcopy(wrapper.dict)
-
-            merge.update(output)
-
-            return _formatter(merge).json
-            
-        if wrapper.pre or wrapper.post:
-            merge = []
-
-            if wrapper.pre:
-                merge.append(wrapper.pre)
-
-            merge.append(output)
-
-            if wrapper.post:
-                merge.append(wrapper.post)
-
-            return _formatter(merge).json
-
-        return _formatter(output).json
-
-    def property_factory(self, fn):
-        wrapper = self
-
-        def json_property(*args, **kwargs):
-            return wrapper.json_wrapper(wrapper, *args, **kwargs)
-
-        return json_property
-
-    def method_factory(self, fn):
-        wrapper = self
-
-        def json_method(*args, **kwargs):
-            return wrapper.json_wrapper(wrapper, *args, **kwargs)
-        
-        return json_method
-
-    def __call__(self, *params, **kwargs):
-        if len(params) == 1 and callable(params[0]):
-            self.fn = params[0]
-
-            if self.json_property:
-                return self.property_factory(params[0])
-            else:
-                return self.method_factory(params[0])
-        else:
-            return _formatter(self.fn(*params, **kwargs)).json
-        
-def jsonify_object(self):
+def _jsonify_object(self):
     output = {}
 
     for name in dir(self.__class__):
         entry = getattr(self.__class__, name)
         if callable(entry) and hasattr(entry, '__qualname__'):
             outer = entry.__qualname__.split('.')[-1]
-
-            print("name is %s outer is %s full is %s" % (name, outer, entry.__qualname__))
 
             if 'json_property' == outer:
                 output[name] = getattr(self, name)()
@@ -157,7 +86,107 @@ def jsonify_object(self):
 
     return ""
 
-def jsonify_class(cls):
-    cls.json = jsonify_object
 
-    return cls
+def _json_wrapper(*args, _wrapper=None, **kwargs):
+    print("args inside wrapper is %s" % repr(args))
+
+    fn = _wrapper.fn
+    output = fn(*args, **kwargs)
+
+    if _wrapper.dict:
+        merge = deepcopy(_wrapper.dict)
+
+        merge.update(output)
+
+        return _formatter(merge).json
+            
+    if _wrapper.pre or _wrapper.post:
+        merge = []
+
+        if _wrapper.pre:
+            merge.append(_wrapper.pre)
+
+        merge.append(output)
+
+        if _wrapper.post:
+            merge.append(_wrapper.post)
+
+        return _formatter(merge).json
+
+    return _formatter(output).json
+
+def _isfunction(x):
+    return isinstance(x, type(lambda: None))
+
+def _isclass(x):
+    return isinstance(x, type)
+
+class jsonify:
+    def set_fn(self, fn):
+        self.fn = fn
+
+        self.fn_short_name = self.fn.__name__
+        self.fn_long_name = self.fn.__qualname__
+
+    def __init__(self, *given, dict=None, pre=None, post=None, json_property=None):
+        self.given = given
+
+        self.dict = dict
+        self.pre = pre
+        self.post = post
+        self.json_property = json_property
+
+        self.cls = None
+        self.fn = None
+
+        if len(given) > 0:
+            first_arg = given[0]
+
+            if _isfunction(first_arg):
+                self.set_fn(first_arg)
+                return
+        
+            if _isclass(first_arg):
+                self.cls = first_arg
+
+    def property_factory(self):
+        print("got to property_factory: " + repr(self.fn))
+
+        @wraps(self.fn)
+        def json_property(*args, **kwargs):
+            print("args before json_wrapper is %s" % repr(args))
+            return _json_wrapper(*args, _wrapper=self, **kwargs)
+
+        return json_property
+
+    def method_factory(self):
+
+        @wraps(self.fn)
+        def json_method(*args, **kwargs):
+            return _json_wrapper(*args, _wrapper=self, **kwargs)
+        
+        return json_method
+    
+    def __call__(self, *params, **kwargs):
+        print(f'self.cls is: %s ' % repr(self.cls))
+        print(f'call params is: %s' % repr(params))
+        
+        if self.cls:
+            clazz = self.cls(*params, **kwargs)
+            clazz.json = _jsonify_object
+            return clazz
+        
+        if len(params) == 1:
+            single_arg = params[0]
+            
+            if _isfunction(single_arg):
+                self.set_fn(single_arg)
+
+                if self.json_property:
+                    return self.property_factory()
+            
+                return self.method_factory()
+        
+        fn = self.fn
+        return _formatter(fn(*params, **kwargs)).json
+
