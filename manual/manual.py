@@ -1,11 +1,22 @@
-from json_decorator import json_class, json_method
+from json_decorator import jsonify_class, jsonify
 
-
-test_registry = []
-
-@json_class(test_registry)
+@jsonify_class
 class test_me:
-	@json_method(registry=test_registry)
+	@jsonify(json_property=True)
 	def test():
 		return 'test'
+	
+	@jsonify
+	def no_arg():
+		return 'pass'
+	
 
+@jsonify_class
+class test_bar:
+	@jsonify(pre='test more')
+	def test():
+		return 'test'
+	
+@jsonify
+def test_fn():
+	return 'test'
