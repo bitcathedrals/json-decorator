@@ -81,7 +81,12 @@ def _jsonify_object(self):
         entry = getattr(cls, name)
         
         if _isfunction(entry) and hasattr(entry, 'json_property') and entry.json_property:
-            output[name] = getattr(self, name)()
+            if isinstance(entry.json_property, str):
+                field_name = entry.json_property
+            else:
+                field_name = name
+
+            output[field_name] = getattr(self, name)()
         
     if output:    
         return _combiner(output)
