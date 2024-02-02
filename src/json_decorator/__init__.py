@@ -7,8 +7,8 @@ from functools import wraps
 
 class Stringified:
     def __init__(self, data, quote=False):
-        if not data:
-            self.json = ""
+        if data is None:
+            self.json = ''
             return
 
         if isinstance(data, Stringified):
@@ -16,22 +16,19 @@ class Stringified:
             return
 
         if isinstance(data, str):
-            if quote:
-                self.json = "\"%s\"" % data
-                return
+            self.json = data
+        else:
+            if isinstance(data, datetime):
+                self.json = f'"%s"' % data.isoformat()
+            else:
+                self.json = str(data)
 
-            self.json = data 
-            return
-
-        if isinstance(data, datetime):
-            self.json = "\"%s\"" % data.isoformat()
-            return
-
-        self.json = str(data)
+        if quote:
+            self.json = f'"%s"' % self.json
 
 def _formatter(output):
     if output is None:
-        return Stringified("")
+        return Stringified(None)
 
     if isinstance(output, dict):
         if not output:
@@ -70,16 +67,21 @@ def _combiner(output):
             
     return Stringified(output).json
 
+def _isfunction(x):
+    return isinstance(x, type(lambda: None))
+
+def _isclass(x):
+    return isinstance(x, type)
+
 def _jsonify_object(self):
     output = {}
+    cls=self.__class__
 
-    for name in dir(self.__class__):
-        entry = getattr(self.__class__, name)
-        if callable(entry) and hasattr(entry, '__qualname__'):
-            outer = entry.__qualname__.split('.')[-1]
-
-            if 'json_property' == outer:
-                output[name] = getattr(self, name)()
+    for name in dir(cls):
+        entry = getattr(cls, name)
+        
+        if _isfunction(entry) and hasattr(entry, 'json_property') and entry.json_property:
+            output[name] = getattr(self, name)()
         
     if output:    
         return _combiner(output)
@@ -88,8 +90,6 @@ def _jsonify_object(self):
 
 
 def _json_wrapper(*args, _wrapper=None, **kwargs):
-    print("args inside wrapper is %s" % repr(args))
-
     fn = _wrapper.fn
     output = fn(*args, **kwargs)
 
@@ -115,26 +115,24 @@ def _json_wrapper(*args, _wrapper=None, **kwargs):
 
     return _formatter(output).json
 
-def _isfunction(x):
-    return isinstance(x, type(lambda: None))
-
-def _isclass(x):
-    return isinstance(x, type)
-
 class jsonify:
     def set_fn(self, fn):
         self.fn = fn
 
+        self.fn.json_property = self.json_property
+
         self.fn_short_name = self.fn.__name__
         self.fn_long_name = self.fn.__qualname__
 
-    def __init__(self, *given, dict=None, pre=None, post=None, json_property=None):
+        #print(f'fn short is: %s fn long is: %s' % (self.fn_short_name, self.fn_long_name))
+
+    def __init__(self, *given, dict=None, pre=None, post=None, p=None):
         self.given = given
 
         self.dict = dict
         self.pre = pre
         self.post = post
-        self.json_property = json_property
+        self.json_property = p
 
         self.cls = None
         self.fn = None
@@ -150,11 +148,9 @@ class jsonify:
                 self.cls = first_arg
 
     def property_factory(self):
-        print("got to property_factory: " + repr(self.fn))
 
         @wraps(self.fn)
         def json_property(*args, **kwargs):
-            print("args before json_wrapper is %s" % repr(args))
             return _json_wrapper(*args, _wrapper=self, **kwargs)
 
         return json_property
@@ -167,14 +163,10 @@ class jsonify:
         
         return json_method
     
-    def __call__(self, *params, **kwargs):
-        print(f'self.cls is: %s ' % repr(self.cls))
-        print(f'call params is: %s' % repr(params))
-        
+    def __call__(self, *params, **kwargs):        
         if self.cls:
-            clazz = self.cls(*params, **kwargs)
-            clazz.json = _jsonify_object
-            return clazz
+            self.cls.json = _jsonify_object
+            return self.cls(*params, **kwargs)
         
         if len(params) == 1:
             single_arg = params[0]

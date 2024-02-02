@@ -2,7 +2,7 @@ from json_decorator import jsonify
 
 @jsonify
 class test_me:
-	@jsonify(json_property=True)
+	@jsonify(p=True)
 	def test(self):
 		return 'test'
 	
