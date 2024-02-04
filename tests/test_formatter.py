@@ -1,11 +1,11 @@
-from json_decorator.json import _formatter as formatter
+from json_decorator import _formatter as formatter
 
 class TestFormatter:
     def test_string(self):
         assert '"string"' == formatter("string").json
 
     def test_digit(self):
-        assert "10" == formatter(10).json
+        assert '10' == formatter(10).json
 
     def test_dict_empty(self):
         assert "{}" == formatter({}).json
