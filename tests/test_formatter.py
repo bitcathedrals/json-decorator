@@ -20,9 +20,9 @@ class TestFormatter:
         assert "[]" == formatter([]).json
 
     def test_list_single(self):
-        assert "[1]" == formatter([1]).json
+        assert "[\n1\n]" == formatter([1]).json
 
     def test_list_multiple(self):
-        assert "[1,2]" == formatter([1,2]).json
+        assert "[\n1,\n2\n]" == formatter([1,2]).json
 
 

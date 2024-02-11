@@ -5,12 +5,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
- toml = "*"
- version-parser = "*"
- decorator = "*"
+toml = "*"
+version-parser = "*"
 [dev-packages]
- build = "*"
- ptpython = "*"
- pytest = "*"
+build = "*"
+ptpython = "*"
+pytest = "*"
 [requires]
- python_version = "3.11"
+python_version = "3.11"

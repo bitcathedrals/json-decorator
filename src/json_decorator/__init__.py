@@ -42,7 +42,7 @@ def _formatter(output):
         if not output:
             return Stringified("[]")
 
-        return Stringified("[" + ",".join([_formatter(element).json for element in output]) + "]")
+        return Stringified("[\n" + ",\n".join([_formatter(element).json for element in output]) + "\n]")
 
     if isinstance(output, str):
         return Stringified(output, quote=True)
