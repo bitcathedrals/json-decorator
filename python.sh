@@ -1,4 +1,5 @@
 # pythonsh configuration file
+
 VERSION=0.4.0
 
 VIRTUAL_PREFIX='json-decorator'

@@ -3,7 +3,6 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-
 name = "json_decorator"
 version = "0.4.0"
 
