@@ -31,7 +31,7 @@ class TestDecorator:
         assert '10' == json_object.a_digit()
 
     def test_list(self, json_object):
-        assert '[1,2,3]' == json_object.a_list()
+        assert "[\n1,\n2,\n3\n]" == json_object.a_list()
 
     def test_dict(self, json_object):
         assert "{\n\"one\": 1,\n\"two\": 2\n}" == json_object.a_dict()
