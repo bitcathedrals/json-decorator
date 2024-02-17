@@ -151,6 +151,8 @@ class jsonify:
         
             if _isclass(first_arg):
                 self.cls = first_arg
+                self.cls.json = _jsonify_object
+                self.__class__.__name__ = self.cls.__name__
 
     def property_factory(self):
 
@@ -170,7 +172,7 @@ class jsonify:
     
     def __call__(self, *params, **kwargs):        
         if self.cls:
-            self.cls.json = _jsonify_object
+
             return self.cls(*params, **kwargs)
         
         if len(params) == 1:
