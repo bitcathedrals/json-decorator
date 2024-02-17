@@ -2,7 +2,7 @@
 VERSION=0.4.0
 
 VIRTUAL_PREFIX='json-decorator'
-PYTHON_VERSION='3.11'
+PYTHON_VERSION='3.12'
 
 
 

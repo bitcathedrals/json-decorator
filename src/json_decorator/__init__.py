@@ -129,8 +129,6 @@ class jsonify:
         self.fn_short_name = self.fn.__name__
         self.fn_long_name = self.fn.__qualname__
 
-        #print(f'fn short is: %s fn long is: %s' % (self.fn_short_name, self.fn_long_name))
-
     def __init__(self, *given, dict=None, pre=None, post=None, p=None):
         self.given = given
 
@@ -151,6 +149,7 @@ class jsonify:
         
             if _isclass(first_arg):
                 self.cls = first_arg
+                self.__name__ = self.cls.__class__.__name__
 
     def property_factory(self):
 
@@ -186,4 +185,12 @@ class jsonify:
         
         fn = self.fn
         return _formatter(fn(*params, **kwargs)).json
+    
+class JsonClass(type):
+    def __new__(cls, name, bases, attrs):
+        derived = super().__new__(cls, name, bases, attrs)
+
+        derived.json = _jsonify_object
+
+        return derived
 

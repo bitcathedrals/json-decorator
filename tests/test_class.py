@@ -37,3 +37,5 @@ class TestDecorator:
         assert "{\n\"one\": 1,\n\"two\": 2\n}" == json_object.a_dict()
 
 
+
+
