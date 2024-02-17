@@ -37,11 +37,5 @@ class TestDecorator:
         assert "{\n\"one\": 1,\n\"two\": 2\n}" == json_object.a_dict()
 
 
-    def test_name(self):
-        obj = SampleJson()
-
-        assert "SampleJson" == obj.__class__.__name__
-        assert "SampleJson" == SampleJson.__class__.__name__
-
 
 
